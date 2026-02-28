@@ -1,5 +1,6 @@
 package com.wowmarket.wowmarket.config;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,7 +16,9 @@ import reactor.core.publisher.Mono;
 @Configuration
 @ConfigurationProperties(prefix = "blizzard")
 public class WebClientConfig {
+    @NotBlank(message = "'blizzard.api-base-url' deve ser configurado e não pode ser vazio")
     private String apiBaseUrl;
+    @NotBlank(message = "'blizzard.auth-base-url' deve ser configurado e não pode ser vazio")
     private String authBaseUrl;
 
     @Bean
@@ -25,7 +28,7 @@ public class WebClientConfig {
                 .filter(errorHandler())
                 .build();
     }
-    // Autenticacao do cliente (OAuth)
+
     @Bean
     public WebClient blizzardAuthWebClient() {
         return WebClient.builder()
@@ -46,7 +49,7 @@ public class WebClientConfig {
                                 return Mono.error(new RuntimeException("token não autorizado"));
 
                             if (response.statusCode().value() == 429)
-                                return Mono.error(new RuntimeException("Muitas requisiÇões"));
+                                return Mono.error(new RuntimeException("Muitas requisições"));
 
                             if (response.statusCode().is5xxServerError())
                                 return Mono.error(new RuntimeException("Erro Interno na Blizzard"));
