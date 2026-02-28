@@ -1,5 +1,7 @@
 package com.wowmarket.wowmarket.config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +10,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 
-
+@Getter
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "blizzard")
 public class WebClientConfig {
@@ -55,21 +58,5 @@ public class WebClientConfig {
             return Mono.just(response);
         });
 
-    }
-
-    public String getApiBaseUrl() {
-        return apiBaseUrl;
-    }
-
-    public void setApiBaseUrl(String apiBaseUrl) {
-        this.apiBaseUrl = apiBaseUrl;
-    }
-
-    public String getAuthBaseUrl() {
-        return authBaseUrl;
-    }
-
-    public void setAuthBaseUrl(String authBaseUrl) {
-        this.authBaseUrl = authBaseUrl;
     }
 }
