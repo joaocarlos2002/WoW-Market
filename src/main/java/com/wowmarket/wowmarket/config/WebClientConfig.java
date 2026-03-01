@@ -6,9 +6,12 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 
 @Getter
@@ -23,16 +26,25 @@ public class WebClientConfig {
 
     @Bean
     public WebClient blizzardApiWebClient() {
+        HttpClient httpClient = HttpClient.create()
+                .compress(true);
+
         return WebClient.builder()
                 .baseUrl(apiBaseUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .filter(errorHandler())
                 .build();
     }
 
     @Bean
     public WebClient blizzardAuthWebClient() {
+        HttpClient httpClient = HttpClient.create()
+                .compress(true);
+
         return WebClient.builder()
                 .baseUrl(authBaseUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .defaultHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .filter(errorHandler())
                 .build();
     }
