@@ -30,6 +30,13 @@ public class BlizzardTokenDto {
         // Ignora propriedades desconhecidas
     }
 
+    @PostConstruct
+    public void initializeTimestamp() {
+        if (obtainedAtEpochSec == 0) {
+            obtainedAtEpochSec = Instant.now().getEpochSecond();
+        }
+    }
+
     public BlizzardTokenDto(String accessToken, String tokenType, long expiresIn) {
         this.accessToken = accessToken;
         this.tokenType = tokenType;
