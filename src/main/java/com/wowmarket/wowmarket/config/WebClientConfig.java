@@ -3,6 +3,8 @@ package com.wowmarket.wowmarket.config;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +21,11 @@ import reactor.netty.http.client.HttpClient;
 @Configuration
 @ConfigurationProperties(prefix = "blizzard")
 public class WebClientConfig {
-    @NotBlank(message = "'blizzard.api-base-url' deve ser configurado e não pode ser vazio")
+    private static final Logger logger = LoggerFactory.getLogger(WebClientConfig.class);
+
+    @NotBlank(message = "['blizzard.api-base-url'] deve ser configurado e não pode ser vazio")
     private String apiBaseUrl;
-    @NotBlank(message = "'blizzard.auth-base-url' deve ser configurado e não pode ser vazio")
+    @NotBlank(message = "['blizzard.auth-base-url'] - deve ser configurado e não pode ser vazio")
     private String authBaseUrl;
 
     @Bean
@@ -58,13 +62,13 @@ public class WebClientConfig {
                         .flatMap(body -> {
 
                             if (response.statusCode().value() == 401)
-                                return Mono.error(new RuntimeException("token não autorizado"));
+                                logger.error("[BLIZZARD API ERROR] - Status 401 - Token de acesso inválido ou expirado");
 
                             if (response.statusCode().value() == 429)
-                                return Mono.error(new RuntimeException("Muitas requisições"));
+                                logger.error("[BLIZZARD API ERROR] - Status 429 - Muitas requisições");
 
                             if (response.statusCode().is5xxServerError())
-                                return Mono.error(new RuntimeException("Erro Interno na Blizzard"));
+                                logger.error("[BLIZZARD API ERROR] - Status: {}, Body: {}", response.statusCode(), body);
 
                             return Mono.error(new RuntimeException(body));
                         });

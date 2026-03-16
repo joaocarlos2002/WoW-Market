@@ -20,14 +20,13 @@ public class BlizzardOAuthController {
 
     @GetMapping("/token")
     public ResponseEntity<String> getBlizzardToken() {
-        logger.debug("endpoint de token chamado, buscando token...");
-        String token = blizzardAuthService.fetchAccessToken();
-        return ResponseEntity.ok(token);
+        logger.debug("[ENDPOINT] - TOKEN ENDPOINT CHAMADO");
+        return ResponseEntity.status(403).build();
     }
 
     @GetMapping("/token/status")
     public ResponseEntity<BlizzardTokenDto> getTokenStatus() {
-        logger.debug("endpoint de token(STATUS) chamado, buscando token...");
+        logger.debug("[ENDPOINT] - TOKEN STATUS ENDPOINT CHAMADO");
         BlizzardTokenDto status = blizzardAuthService.getTokenStatus();
         if (status == null) {
             return ResponseEntity.noContent().build();
