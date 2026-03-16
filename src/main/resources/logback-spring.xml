@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- ========================= -->
+    <!-- PROPRIEDADES GERAIS -->
+    <!-- ========================= -->
+
+    <property name="APP_NAME" value="wowmarket"/>
+    <property name="LOG_PATH" value="logs"/>
+    <property name="MAX_HISTORY" value="30"/>
+    <property name="MAX_FILE_SIZE" value="10MB"/>
+    <property name="CONSOLE_PATTERN"
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %m%n%wEx"/>
+    <property name="FILE_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+
+    <!-- ========================= -->
+    <!-- APPENDER CONSOLE -->
+    <!-- ========================= -->
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- ========================= -->
+    <!-- APPENDER ARQUIVO -->
+    <!-- ========================= -->
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+
+            <!-- Rotação diária -->
+            <fileNamePattern>
+                ${LOG_PATH}/archive/${APP_NAME}.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+
+            <!-- tamanho máximo por arquivo -->
+            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+
+            <!-- histórico -->
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+
+            <!-- limite total -->
+            <totalSizeCap>1GB</totalSizeCap>
+
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+
+    </appender>
+
+
+    <!-- ========================= -->
+    <!-- LOGS POR PACOTE -->
+    <!-- ========================= -->
+
+    <logger name="com.wowmarket" level="INFO"/>
+
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.hibernate" level="WARN"/>
+
+    <!-- SQL Debug (desligado por padrão) -->
+    <logger name="org.hibernate.SQL" level="OFF"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="OFF"/>
+
+
+    <!-- ========================= -->
+    <!-- ROOT LOGGER -->
+    <!-- ========================= -->
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
