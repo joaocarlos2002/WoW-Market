@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
 
     <!-- ========================= -->
     <!-- PROPRIEDADES GERAIS -->
@@ -9,21 +11,40 @@
     <property name="LOG_PATH" value="logs"/>
     <property name="MAX_HISTORY" value="30"/>
     <property name="MAX_FILE_SIZE" value="10MB"/>
-    <property name="CONSOLE_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %m%n%wEx"/>
+
+    <!-- PADRÃO COM CORES (LOCAL/DEV) -->
+    <property name="CONSOLE_PATTERN_COLORED"
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} : %m%n%ex"/>
+
+    <!-- PADRÃO SEM CORES (DOCKER/PROD) -->
+    <property name="CONSOLE_PATTERN_PLAIN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID} --- [%15.15t] %-40.40logger{39} : %m%n%ex"/>
+
     <property name="FILE_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
 
     <!-- ========================= -->
-    <!-- APPENDER CONSOLE -->
+    <!-- APPENDER CONSOLE (DEV COM CORES) -->
     <!-- ========================= -->
+    <springProfile name="!docker,!prod">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_PATTERN_COLORED}</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
+    </springProfile>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>${CONSOLE_PATTERN}</pattern>
-        </encoder>
-    </appender>
+    <!-- APPENDER CONSOLE (DOCKER/PROD SEM CORES) -->
+    <springProfile name="docker,prod">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_PATTERN_PLAIN}</pattern>
+                <charset>utf8</charset>
+            </encoder>
+        </appender>
+    </springProfile>
 
 
     <!-- ========================= -->
@@ -34,27 +55,16 @@
         <file>${LOG_PATH}/${APP_NAME}.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-
-            <!-- Rotação diária -->
-            <fileNamePattern>
-                ${LOG_PATH}/archive/${APP_NAME}.%d{yyyy-MM-dd}.%i.log
-            </fileNamePattern>
-
-            <!-- tamanho máximo por arquivo -->
+            <fileNamePattern>${LOG_PATH}/archive/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
-
-            <!-- histórico -->
             <maxHistory>${MAX_HISTORY}</maxHistory>
-
-            <!-- limite total -->
             <totalSizeCap>1GB</totalSizeCap>
-
         </rollingPolicy>
 
         <encoder>
             <pattern>${FILE_PATTERN}</pattern>
+            <charset>utf8</charset>
         </encoder>
-
     </appender>
 
 
@@ -63,16 +73,13 @@
     <!-- ========================= -->
 
     <logger name="com.wowmarket" level="INFO"/>
-
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.hibernate" level="WARN"/>
-
     <logger name="com.wowmarket.wowmarket.service.BlizzardAuthService" level="DEBUG"/>
     <logger name="com.wowmarket.wowmarket.controller.BlizzardOAuthController" level="DEBUG"/>
 
-
-    <!-- SQL Debug (desligado por padrão) -->
+    <!-- SQL Debug -->
     <logger name="org.hibernate.SQL" level="OFF"/>
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="OFF"/>
 

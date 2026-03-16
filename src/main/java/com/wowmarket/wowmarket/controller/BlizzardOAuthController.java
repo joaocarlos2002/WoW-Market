@@ -21,7 +21,7 @@ public class BlizzardOAuthController {
     @GetMapping("/token")
     public ResponseEntity<String> getBlizzardToken() {
         logger.debug("[ENDPOINT] - TOKEN ENDPOINT CHAMADO");
-        return ResponseEntity.status(403).build();
+        return ResponseEntity.status(200).build();
     }
 
     @GetMapping("/token/status")

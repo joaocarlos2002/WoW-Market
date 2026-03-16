@@ -16,7 +16,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: wow-market-api
     depends_on:
       - postgres
@@ -24,9 +26,13 @@ services:
       DB_PASSWORD: postgres
       BLIZZARD_CLIENT_ID: ${BLIZZARD_CLIENT_ID}
       BLIZZARD_CLIENT_SECRET: ${BLIZZARD_CLIENT_SECRET}
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wowmarket
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
     ports:
       - "8080:8080"
+    restart: on-failure
 
 volumes:
   postgres_data:
-

@@ -2,6 +2,15 @@ FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+# Copia os arquivos de build
+COPY pom.xml .
+COPY mvnw .
+COPY mvnw.cmd .
+COPY .mvn .mvn
+COPY src ./src
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Compila o projeto
+RUN chmod +x ./mvnw && ./mvnw clean package -DskipTests
+
+# Roda a aplicação
+ENTRYPOINT ["java", "-jar", "target/wowmarket-0.0.1-SNAPSHOT.jar"]
