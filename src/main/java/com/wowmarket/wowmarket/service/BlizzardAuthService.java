@@ -35,14 +35,14 @@ public class BlizzardAuthService {
 
     @Scheduled(fixedDelay = 3600000) // A cada 1 hora
     public void refreshTokenScheduled() {
-        logger.info("reparando token...");
+        logger.debug("reparando token...");
         this.cachedToken = null;
         fetchAccessToken();
     }
 
     public synchronized String fetchAccessToken() {
         if (cachedToken != null && !cachedToken.isExpired()) {
-            logger.warn("token em cache ainda é válido, retornando ele...");
+            logger.debug("token em cache ainda é válido, retornando ele...");
             return cachedToken.getAccessToken();
         }
 

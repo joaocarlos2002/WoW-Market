@@ -68,6 +68,10 @@
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.hibernate" level="WARN"/>
 
+    <logger name="com.wowmarket.wowmarket.service.BlizzardAuthService" level="DEBUG"/>
+    <logger name="com.wowmarket.wowmarket.controller.BlizzardOAuthController" level="DEBUG"/>
+
+
     <!-- SQL Debug (desligado por padrão) -->
     <logger name="org.hibernate.SQL" level="OFF"/>
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="OFF"/>
