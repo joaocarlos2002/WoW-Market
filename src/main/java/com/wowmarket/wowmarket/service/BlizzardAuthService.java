@@ -1,9 +1,7 @@
 package com.wowmarket.wowmarket.service;
 
 import com.wowmarket.wowmarket.dto.BlizzardTokenDto;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@Setter
+
 @Getter
 @Service
 public class BlizzardAuthService {
@@ -26,7 +24,7 @@ public class BlizzardAuthService {
     private String clientSecret;
 
     private final WebClient blizzardAuthWebClient;
-    private BlizzardTokenDto cachedToken;
+    private volatile BlizzardTokenDto cachedToken;
 
     public BlizzardAuthService(WebClient blizzardAuthWebClient) {
         this.blizzardAuthWebClient = blizzardAuthWebClient;
@@ -34,7 +32,7 @@ public class BlizzardAuthService {
 
 
     @Scheduled(fixedDelay = 3600000) // A cada 1 hora
-    public void refreshTokenScheduled() {
+    public synchronized void refreshTokenScheduled() {
         logger.debug("reparando token...");
         this.cachedToken = null;
         fetchAccessToken();
@@ -64,7 +62,7 @@ public class BlizzardAuthService {
         return response.getAccessToken();
     }
 
-    public BlizzardTokenDto getTokenStatus() {
+    public synchronized BlizzardTokenDto getTokenStatus() {
         return cachedToken;
     }
 
