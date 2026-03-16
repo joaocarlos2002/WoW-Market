@@ -20,9 +20,8 @@ public class BlizzardOAuthController {
 
     @GetMapping("/token")
     public ResponseEntity<String> getBlizzardToken() {
-        logger.debug("endpoint de token chamado, buscando token...");
-        String token = blizzardAuthService.fetchAccessToken();
-        return ResponseEntity.ok(token);
+        logger.warn("Direct Blizzard access token retrieval endpoint called. Returning 403 to avoid exposing sensitive tokens.");
+        return ResponseEntity.status(403).build();
     }
 
     @GetMapping("/token/status")
