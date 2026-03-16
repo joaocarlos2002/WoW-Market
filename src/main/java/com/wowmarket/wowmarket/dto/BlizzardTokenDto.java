@@ -53,17 +53,7 @@ public class BlizzardTokenDto {
     }
 
     public boolean isExpired(long marginSec) {
-        if (obtainedAtEpochSec == 0) {
-            obtainedAtEpochSec = Instant.now().getEpochSecond();
-        }
         long currentEpochSec = Instant.now().getEpochSecond();
         return currentEpochSec >= ((obtainedAtEpochSec + expiresIn) - marginSec);
-    }
-
-    @PostConstruct
-    private void initializeTimestamp() {
-        if (obtainedAtEpochSec == 0) {
-            obtainedAtEpochSec = Instant.now().getEpochSecond();
-        }
     }
 }
