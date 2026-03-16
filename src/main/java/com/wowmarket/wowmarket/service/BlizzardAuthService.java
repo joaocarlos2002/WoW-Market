@@ -4,6 +4,7 @@ import com.wowmarket.wowmarket.dto.BlizzardTokenDto;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,10 +27,9 @@ public class BlizzardAuthService {
     private final WebClient blizzardAuthWebClient;
     private volatile BlizzardTokenDto cachedToken;
 
-    public BlizzardAuthService(WebClient blizzardAuthWebClient) {
+    public BlizzardAuthService(@Qualifier("blizzardAuthWebClient") WebClient blizzardAuthWebClient) {
         this.blizzardAuthWebClient = blizzardAuthWebClient;
     }
-
 
     @Scheduled(fixedDelay = 3600000) // A cada 1 hora
     public synchronized void refreshTokenScheduled() {
