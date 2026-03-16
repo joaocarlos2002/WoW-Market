@@ -56,7 +56,10 @@ public class BlizzardAuthService {
                 .bodyToMono(BlizzardTokenDto.class)
                 .block();
 
-        if (response == null) throw new RuntimeException();
+        if (response == null) {
+            logger.warn("[ERRO] - FALHA AO OBTER TOKEN: Resposta nula da Blizzard");
+            throw new IllegalStateException("Falha ao obter token de acesso da Blizzard: resposta nula");
+        }
 
         this.cachedToken = response;
         return response.getAccessToken();
