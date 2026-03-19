@@ -31,6 +31,10 @@ public class BlizzardAuthService {
         this.blizzardAuthWebClient = blizzardAuthWebClient;
     }
 
+    public BlizzardAuthService() {
+        this.blizzardAuthWebClient = null;
+    }
+
     @Scheduled(fixedDelay = 3600000) // A cada 1 hora
     public synchronized void refreshTokenScheduled() {
         logger.debug("[STATUS] - REFRESH TOKEN SCHEDULED: Limpando token em cache e buscando um novo...");
@@ -42,6 +46,11 @@ public class BlizzardAuthService {
         if (cachedToken != null && !cachedToken.isExpired()) {
             logger.debug("[STATUS] - FETCH TOKEN: Token cache expired]");
             return cachedToken.getAccessToken();
+        }
+
+        if (blizzardAuthWebClient == null) {
+            logger.warn("[ERRO] - WebClient não configurado para Blizzard Auth");
+            throw new IllegalStateException("WebClient não está configurado. Verifique as variáveis de ambiente BLIZZARD_CLIENT_ID e BLIZZARD_CLIENT_SECRET");
         }
 
         // PRECISA SER EM BASE64: clientId:clientSecret - SE MUDAR FUTURAMENTE LEMBRAR!!!!
