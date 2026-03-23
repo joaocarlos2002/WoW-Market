@@ -1,7 +1,6 @@
 package com.wowmarket.wowmarket.service;
 
 import com.wowmarket.wowmarket.dto.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,10 +19,6 @@ class HealthCheckerServiceTest {
 
     @InjectMocks
     private HealthCheckerService healthCheckerService;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     void testCheckHealthDisk() {
