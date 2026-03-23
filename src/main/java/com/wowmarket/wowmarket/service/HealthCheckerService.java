@@ -172,25 +172,25 @@ public class HealthCheckerService {
     }
 
     public HealthResponse checkHealth() {
-        String statusHealth;
-
         DiskHealthResponse diskHealth = checkHealthDisk();
         DatabaseHealthResponse databaseHealth = checkHealthDatabase();
         MemoryHealthResponse memoryHealth = checkHealthMemory();
         ThreadsHealthResponse threadsHealth = checkHealthThreads();
         CpuHealthResponse cpuHealth = getCpuUsage();
 
-        if (diskHealth.getStatus().equals("UP") &&
-            databaseHealth.getStatus().equals("UP") &&
-            memoryHealth.getStatus().equals("UP") &&
-            threadsHealth.getStatus().equals("UP") &&
-            cpuHealth.getStatus().equals("UP")) {
+        String statusHealth;
+        if ("UP".equals(diskHealth.getStatus()) &&
+                "UP".equals(databaseHealth.getStatus()) &&
+                "UP".equals(memoryHealth.getStatus()) &&
+                "UP".equals(threadsHealth.getStatus()) &&
+                "UP".equals(cpuHealth.getStatus())) {
             statusHealth = "UP";
         } else {
             statusHealth = "DOWN";
         }
 
         return HealthResponse.builder()
+                .status(statusHealth)
                 .checkHealthDisk(diskHealth)
                 .databaseHealth(databaseHealth)
                 .memoryHealth(memoryHealth)
