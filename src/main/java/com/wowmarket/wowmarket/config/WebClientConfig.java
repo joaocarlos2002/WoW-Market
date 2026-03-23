@@ -75,7 +75,6 @@ public class WebClientConfig {
                             return Mono.error(new RuntimeException(body));
                         });
             }
-
             return Mono.just(response);
         });
 

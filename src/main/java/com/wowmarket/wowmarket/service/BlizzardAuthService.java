@@ -44,6 +44,11 @@ public class BlizzardAuthService {
             return cachedToken.getAccessToken();
         }
 
+        if (blizzardAuthWebClient == null) {
+            logger.warn("[ERRO] - WebClient não configurado para Blizzard Auth");
+            throw new IllegalStateException("WebClient não está configurado. Verifique as variáveis de ambiente BLIZZARD_CLIENT_ID e BLIZZARD_CLIENT_SECRET");
+        }
+
         // PRECISA SER EM BASE64: clientId:clientSecret - SE MUDAR FUTURAMENTE LEMBRAR!!!!
         BlizzardTokenDto response = blizzardAuthWebClient
                 .post()
