@@ -19,12 +19,12 @@ public class MemoryHealthResponse {
     private long maxMemory;
 
     public MemoryHealthResponse(Map<String, Object> memoryHealth) {
-        if ( memoryHealth != null) {
-        this.status = (String) memoryHealth.get("status");
-        this.freeMemory = (long) memoryHealth.get("freeMemory");
-        this.totalMemory = (long) memoryHealth.get("totalMemory");
-        this.usedMemory = (long) memoryHealth.get("usedMemory");
-        this.maxMemory = (long) memoryHealth.get("maxMemory");
+        if (memoryHealth != null) {
+            this.status = (String) memoryHealth.get("status");
+            this.freeMemory = ((Number) memoryHealth.get("freeMemory")).longValue();
+            this.totalMemory = ((Number) memoryHealth.get("totalMemory")).longValue();
+            this.usedMemory = ((Number) memoryHealth.get("usedMemory")).longValue();
+            this.maxMemory = ((Number) memoryHealth.get("maxMemory")).longValue();
         }
     }
 }
