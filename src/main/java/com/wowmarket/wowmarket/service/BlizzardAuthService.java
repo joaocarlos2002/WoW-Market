@@ -31,10 +31,6 @@ public class BlizzardAuthService {
         this.blizzardAuthWebClient = blizzardAuthWebClient;
     }
 
-    public BlizzardAuthService() {
-        this.blizzardAuthWebClient = null;
-    }
-
     @Scheduled(fixedDelay = 3600000) // A cada 1 hora
     public synchronized void refreshTokenScheduled() {
         logger.debug("[STATUS] - REFRESH TOKEN SCHEDULED: Limpando token em cache e buscando um novo...");

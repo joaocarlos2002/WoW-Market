@@ -3,32 +3,25 @@ package com.wowmarket.wowmarket.service;
 import com.wowmarket.wowmarket.dto.*;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ThreadMXBean;
+import java.sql.SQLException;
 
-
-@Getter
 @Service
 public class HealthCheckerService {
     private static final Logger logger = LoggerFactory.getLogger(HealthCheckerService.class);
 
-    private volatile DiskHealthResponse diskHealthResponse;
-    private volatile DatabaseHealthResponse databaseHealthResponse;
-    private volatile CpuHealthResponse cpuHealthResponse;
-    private volatile MemoryHealthResponse memoryHealthResponse;
-    private volatile ThreadsHealthResponse threadsHealthResponse;
-    private volatile HealthResponse healthResponse;
+    private final DataSource dataSource;
 
-    @Autowired
-    private DataSource dataSource;
+    public HealthCheckerService(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public DiskHealthResponse checkHealthDisk(){
         File disk = new File("/");
@@ -53,9 +46,33 @@ public class HealthCheckerService {
                 .build();
     }
 
+    @SuppressWarnings("resource")
     public DatabaseHealthResponse checkHealthDatabase() {
-        HikariDataSource hikari = (HikariDataSource) dataSource;
+        final HikariDataSource hikari;
+        try {
+            hikari = dataSource.unwrap(HikariDataSource.class);
+        } catch (SQLException e) {
+            logger.warn("Nao foi possivel obter HikariDataSource via unwrap", e);
+            return DatabaseHealthResponse.builder()
+                    .status("UNKNOWN")
+                    .activeConnections(0)
+                    .idleConnections(0)
+                    .totalConnections(0)
+                    .threadsAwaitingConnection(0)
+                    .build();
+        }
+
         HikariPoolMXBean pool = hikari.getHikariPoolMXBean();
+        if (pool == null) {
+            logger.warn("Metricas do pool Hikari nao estao disponiveis");
+            return DatabaseHealthResponse.builder()
+                    .status("UNKNOWN")
+                    .activeConnections(0)
+                    .idleConnections(0)
+                    .totalConnections(0)
+                    .threadsAwaitingConnection(0)
+                    .build();
+        }
 
         int activeConnections = pool.getActiveConnections();
         int idleConnections = pool.getIdleConnections();
@@ -72,7 +89,7 @@ public class HealthCheckerService {
                 .threadsAwaitingConnection(threadsAwaitingConnection)
                 .build();
     }
-
+    
     public MemoryHealthResponse checkHealthMemory() {
 
         Runtime runtime = Runtime.getRuntime();
@@ -81,13 +98,25 @@ public class HealthCheckerService {
         long freeMemory = runtime.freeMemory();
         long maxMemory = runtime.maxMemory();
         long  usedMemory = totalMemory - freeMemory;
+        double usedMemoryRatio = (double) usedMemory / maxMemory;
+        double threshold = 0.9; // 90% of max memory
+        boolean memoryUsageHigh = usedMemoryRatio > threshold;
 
-        String statusMemory = (freeMemory < maxMemory) ? "UP" : "DOWN";
 
-         if (freeMemory < maxMemory) {
-            logger.warn("Memória livre baixa: apenas {} bytes livres", freeMemory);
+        String statusMemory = memoryUsageHigh ? "DOWN" : "UP";
+
+        if (memoryUsageHigh) {
+            logger.warn(
+                    "Memória livre baixa: apenas {} bytes livres (uso de memória: {}%)",
+                    freeMemory,
+                    String.format("%.2f", usedMemoryRatio * 100)
+            );
         } else {
-            logger.debug("Memória livre suficiente: {} bytes livres", freeMemory);
+            logger.debug(
+                    "Memória livre suficiente: {} bytes livres (uso de memória: {}%)",
+                    freeMemory,
+                    String.format("%.2f", usedMemoryRatio * 100)
+            );
         }
 
         return MemoryHealthResponse.builder()
@@ -120,7 +149,7 @@ public class HealthCheckerService {
     public CpuHealthResponse getCpuUsage() {
 
         String statusCpu;
-        OperatingSystemMXBean usageCpu =  (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        OperatingSystemMXBean usageCpu = ManagementFactory.getOperatingSystemMXBean();
 
         double systemLoadAverage = usageCpu.getSystemLoadAverage();
         if  (systemLoadAverage < 0.01) {
@@ -145,23 +174,28 @@ public class HealthCheckerService {
     public HealthResponse checkHealth() {
         String statusHealth;
 
-        if(checkHealthDisk().getStatus().equals("UP") &&
-                checkHealthDatabase().getStatus().equals("UP") &&
-                checkHealthMemory().getStatus().equals("UP") &&
-                checkHealthThreads().getStatus().equals("UP") &&
-                getCpuUsage().getStatus().equals("UP")) {
+        DiskHealthResponse diskHealth = checkHealthDisk();
+        DatabaseHealthResponse databaseHealth = checkHealthDatabase();
+        MemoryHealthResponse memoryHealth = checkHealthMemory();
+        ThreadsHealthResponse threadsHealth = checkHealthThreads();
+        CpuHealthResponse cpuHealth = getCpuUsage();
+
+        if (diskHealth.getStatus().equals("UP") &&
+            databaseHealth.getStatus().equals("UP") &&
+            memoryHealth.getStatus().equals("UP") &&
+            threadsHealth.getStatus().equals("UP") &&
+            cpuHealth.getStatus().equals("UP")) {
             statusHealth = "UP";
         } else {
             statusHealth = "DOWN";
         }
 
         return HealthResponse.builder()
-                .status(statusHealth)
-                .checkHealthDisk(checkHealthDisk())
-                .databaseHealth(checkHealthDatabase())
-                .memoryHealth(checkHealthMemory())
-                .threadsHealth(checkHealthThreads())
-                .cpuHealth(getCpuUsage())
+                .checkHealthDisk(diskHealth)
+                .databaseHealth(databaseHealth)
+                .memoryHealth(memoryHealth)
+                .threadsHealth(threadsHealth)
+                .cpuHealth(cpuHealth)
                 .build();
     }
 }

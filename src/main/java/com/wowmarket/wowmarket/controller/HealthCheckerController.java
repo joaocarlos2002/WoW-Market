@@ -16,7 +16,7 @@ public class HealthCheckerController {
     @Autowired
     private HealthCheckerService healthCheckerService;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<@NonNull HealthResponse> checkHealth() {
         HealthResponse health = healthCheckerService.checkHealth();
         return ResponseEntity.ok(health);
